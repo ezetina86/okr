@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=okr_user
+      - POSTGRES_PASSWORD=okr_password
+      - POSTGRES_DB=okr_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./src/database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:Z
+      - ./src/database/init_data.sql:/docker-entrypoint-initdb.d/2-init_data.sql:Z
+
+  web:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./src:/app/src:Z
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://okr_user:okr_password@db:5432/okr_database
